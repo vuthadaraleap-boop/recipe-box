@@ -1,17 +1,33 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import RecipeList from "./components/RecipeList.vue";
+import RecipeDetail from "./components/RecipeDetail.vue";
 import { initialRecipes } from "./data/recipes";
 import type { Recipe } from "./types";
 
-// App owns the data. A copy keeps the original sample data untouched.
+// App owns the data
 const recipes = ref<Recipe[]>(initialRecipes.map((r) => ({ ...r })));
 
-// Which recipe the user picked (the detail screen comes next)
+// Which recipe is open (null = show the list)
 const selectedId = ref<number | null>(null);
+
+const selected = computed(() =>
+  recipes.value.find((r) => r.id === selectedId.value),
+);
 
 function onSelect(id: number) {
   selectedId.value = id;
+}
+
+function onBack() {
+  selectedId.value = null;
+}
+
+function onToggleFavourite(id: number) {
+  const recipe = recipes.value.find((r) => r.id === id);
+  if (recipe) {
+    recipe.favourite = !recipe.favourite;
+  }
 }
 
 function onAdd() {
@@ -21,10 +37,18 @@ function onAdd() {
 
 <template>
   <main>
-    <RecipeList :recipes="recipes" @select="onSelect" @add="onAdd" />
-    <p v-if="selectedId !== null" class="picked">
-      You picked recipe {{ selectedId }}.
-    </p>
+    <RecipeDetail
+      v-if="selected"
+      :recipe="selected"
+      @back="onBack"
+      @toggle-favourite="onToggleFavourite"
+    />
+    <RecipeList
+      v-else
+      :recipes="recipes"
+      @select="onSelect"
+      @add="onAdd"
+    />
   </main>
 </template>
 
@@ -33,9 +57,5 @@ main {
   max-width: 1000px;
   margin: 0 auto;
   padding: 24px;
-}
-.picked {
-  margin-top: 16px;
-  color: #6b7280;
 }
 </style>
