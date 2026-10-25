@@ -23,6 +23,7 @@ const emit = defineEmits<{ select: [id: number] }>();
 <style scoped>
 .card {
   background: white;
+  color: #111827;
   border: 1px solid #d1d5db;
   border-radius: 10px;
   padding: 16px;
